@@ -1,0 +1,69 @@
+import napari
+from napari.types import ImageData
+import numpy as np
+from skimage.draw import ellipse
+from magicgui import magicgui
+
+@magicgui(call_button='Create Viewer')
+def create_viewer(image: ImageData):
+    return napari.Viewer(data=image)
+
+@magicgui
+def annotate_circles(function: napari.Viewer, radius: int = 10):
+    @viewer.mouse_drag_callbacks.append
+    def draw_circle(viewer, event):
+        if event.button == 1:
+            x, y = event.position[-2:]
+            z = viewer.dims.current_step[0]
+            rr, cc = circle(y, x, radius, shape=viewer.layers[0].data[z].shape)
+            viewer.layers[1].data[z][rr, cc] = True
+     '''  
+     for i in range(image.shape[0]):
+        coords = ellipse(image[i], radius=radius)
+        centers = np.column_stack(coords)
+        radii = np.full(len(centers), radius)
+        circles.append((centers, radii))
+
+    # Combine all circles detected across each slice of the image
+    centers = np.concatenate([c[0] for c in circles])
+    radii = np.concatenate([c[1] for c in circles])
+    return centers, radii
+    '''
+@magicgui
+def get_circle_data(viewer: napari.Viewer):
+    layers = viewer.layers
+    data = layers[1].data
+    z, y, x = np.where(data)
+    r = layers[1].metadata['radius']
+    centers = np.column_stack([x, y, z])
+    radii = np.full(len(centers), r)
+    #atpase = np.
+    return centers, radii, atpase
+
+@magicgui
+def main(image_path):
+    # 加载图像数据
+    image = np.load(image_path)
+
+    # 创建napari查看器
+    viewer = create_viewer(image)
+
+    # 添加标记功能
+    annotate_circles(viewer, radius=10)
+
+    # 显示napari界面
+    viewer.show()
+
+    # 获取标记数据
+    centers, radii = get_circle_data(viewer)
+
+    # 保存标记数据为ndarray
+    np.savez('circle_data.npz', centers=centers, radii=radii,atpase=atpase)
+    
+#main('input_image.npy')
+viewer = napari.Viewer()
+    # add our new magicgui widget to the viewer
+viewer.window.add_dock_widget(annotate_circles,   area="right")
+   # Start the napari event loop
+
+napari.run()
